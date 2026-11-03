@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body { font: 13px system-ui, sans-serif; width: 280px; margin: 12px; }
+      label { display: block; margin-top: 10px; font-weight: 600; }
+      input[type="text"] { width: 100%; box-sizing: border-box; margin-top: 4px; padding: 4px; }
+      .row { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+      .hint { color: #666; font-size: 11px; margin-top: 8px; }
+      #preview { margin-top: 10px; padding: 6px; background: #f2f2f2; border-radius: 4px; }
+      button { margin-top: 10px; }
+    </style>
+  </head>
+  <body>
+    <label for="format" style="margin-top: 0">Format</label>
+    <input type="text" id="format" spellcheck="false" />
+
+    <div class="hint">
+      Uses <a href="https://date-fns.org/docs/format" target="_blank" rel="noopener">date-fns format tokens</a>
+      (e.g. <code>d MMM yyyy, HH:mm</code>). Wrap literal text in single quotes: <code>'at'</code>.
+    </div>
+
+    <label class="row">
+      <input type="checkbox" id="hideDateToday" />
+      Hide the date for today's timestamps
+    </label>
+
+    <label class="row">
+      <input type="checkbox" id="hideYearThisYear" />
+      Hide the year for this year's timestamps
+    </label>
+
+    <div id="preview"></div>
+    <button id="reset">Reset to defaults</button>
+    <script src="dist/popup.js"></script>
+  </body>
+</html>

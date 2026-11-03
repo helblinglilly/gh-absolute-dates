@@ -1,0 +1,20 @@
+{
+  "name": "gh-absolute-dates",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc",
+    "package": "scripts/package.sh",
+    "build": "tsc && esbuild src/content.ts src/popup.ts --bundle --target=es2020 --outdir=dist",
+    "watch": "esbuild src/content.ts src/popup.ts --bundle --target=es2020 --outdir=dist --watch"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.280",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.0",
+    "web-ext": "^10.8.0"
+  },
+  "dependencies": {
+    "date-fns": "^4.4.0"
+  }
+}

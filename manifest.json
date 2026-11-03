@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "GitHub Absolute Dates",
+  "version": "1.0.0",
+  "description": "Shows absolute timestamps on GitHub instead of relative ones (e.g. \"Nov 3, 2026\" instead of \"1 minute ago\").",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://github.com/*"
+      ],
+      "js": [
+        "dist/content.js"
+      ],
+      "run_at": "document_start",
+      "css": [
+        "content.css"
+      ]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "gh-absolute-dates@helblinglilly.github.io",
+      "strict_min_version": "109.0"
+    }
+  },
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_title": "GitHub Absolute Dates",
+    "default_popup": "popup.html"
+  }
+}

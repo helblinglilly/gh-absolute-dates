@@ -1,0 +1,12 @@
+/* Absolute dates are longer than "3 days ago" and can be wider than fixed-width
+   cells (e.g. the file table's "last commit" column). Keep them on one line and,
+   when they don't fit, let them overflow to the left so the END of the date stays
+   aligned with the cell's right edge (flex-end overflows toward the start side).
+   inline-flex + max-width keeps short timestamps sized and flowing as before. */
+relative-time,
+time-ago {
+  display: inline-flex;
+  justify-content: flex-end;
+  max-width: 100%;
+  white-space: nowrap;
+}
