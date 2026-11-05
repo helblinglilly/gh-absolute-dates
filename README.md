@@ -1,22 +1,16 @@
 # GitHub Absolute Dates
 
-Browser extension (Chrome + Firefox, Manifest V3) that replaces GitHub's relative
+A browser extension for Chrome and Firefox that replaces GitHub's relative
 timestamps ("1 minute ago") with absolute dates ("10 Oct 2026, 22:38").
 
-## Repository layout
-
-- [Extension](extension/) contains the Chrome and Firefox extension and its build scripts.
-- [Website](website/) contains the static landing page. Open `website/public/index.html` locally or serve `website/public/` with a static web host.
+![GitHub Absolute Dates extension in use](.github/screenshots/screenshot.png)
 
 ## Install
 
-Download the latest packages from the
-[Releases page](https://github.com/helblinglilly/gh-absolute-dates/releases/latest).
-
 ### Chrome (and Chromium browsers: Edge, Brave, ...)
 
-1. Download `gh-absolute-dates-chrome-vX.Y.Z.zip` and **unzip it** to a folder you will keep
-   (Chrome loads the extension from that folder, so don't delete it).
+1. Download the Chrome ZIP from [GitHub Releases](https://github.com/helblinglilly/gh-absolute-dates/releases/latest)
+   and **unzip it** into a folder you can keep. Chrome loads the extension from that folder.
 2. Open `chrome://extensions` and turn on **Developer mode** (top right).
 3. Click **Load unpacked** and select the unzipped folder.
 4. Optional: pin the extension from the puzzle-piece menu to reach its settings.
@@ -26,16 +20,9 @@ arrow on the extension's card.
 
 ### Firefox
 
-- **Signed `.xpi` (if the release has one):** download `gh-absolute-dates-firefox-vX.Y.Z...xpi`
-  and open it in Firefox (or drag it onto a Firefox window), then confirm **Add**. This
-  installs permanently.
-- **Otherwise (unsigned `.zip`):** Firefox only keeps unsigned add-ons until it restarts.
-  1. Download `gh-absolute-dates-firefox-vX.Y.Z.zip` and unzip it.
-  2. Open `about:debugging#/runtime/this-firefox`.
-  3. Click **Load Temporary Add-on…** and pick `manifest.json` from the unzipped folder.
-
-  For a permanent unsigned install you need Firefox Developer Edition or Nightly with
-  `xpinstall.signatures.required` set to `false` in `about:config`.
+Open [gh.helbling.uk](https://gh.helbling.uk/) in Firefox, choose **Install for Firefox**,
+and confirm **Add**. To update version 1.0.1, install the newer build from the same
+page when it becomes available.
 
 ## Settings
 
@@ -54,60 +41,4 @@ Click the extension's toolbar icon:
 
 Both checkboxes are off by default. Changes apply live, without reloading GitHub.
 
-## How it works
-
-GitHub renders `<relative-time datetime="…">` elements with the text inside an open
-shadow root. The content script formats the `datetime` attribute with date-fns using the
-pattern from the toolbar popup, writes it into the shadow root, and watches for re-renders
-and new elements. Settings are stored in `storage.sync` and applied live.
-
-## Development
-
-```
-cd extension
-npm ci
-npm run build      # typecheck + bundle into dist/
-npm run watch      # rebuild on change
-```
-
-Source is in `src/` (`content.ts`, `popup.ts`, `format.ts`, `settings.ts`).
-
-Load it for testing:
-
-- **Chrome:** `chrome://extensions` → Developer mode → *Load unpacked* → select `extension/`.
-- **Firefox:** `about:debugging#/runtime/this-firefox` → *Load Temporary Add-on* → select
-  `manifest.json`, or run `npx web-ext run`.
-
-Build the same packages the release produces with `npm run package` (output in `artifacts/`).
-
-## Releasing
-
-Releases are built by GitHub Actions (`.github/workflows/release.yml`). To publish one:
-
-```
-git tag v1.2.0
-git push origin v1.2.0
-```
-
-The workflow builds the extension, stamps the tag's version into the manifest, and attaches
-a Chrome zip and a Firefox package to a new GitHub release.
-
-To also attach a **signed Firefox `.xpi`**, provision the `extension-release` environment secrets `AMO_JWT_ISSUER` and
-`AMO_JWT_SECRET` (API keys from <https://addons.mozilla.org/developers/addon/api/key/>).
-Without them the Firefox package is an unsigned zip. Publishing to the Chrome Web Store or
-the public Firefox add-on listing is not automated.
-
-Extension CI builds changes under `extension/`. Website CI runs for changes under
-`website/` and uploads the static files as a `website` artifact. Each workflow also
-runs when its own configuration changes. Website changes can ship independently of
-extension release tags.
-
-Website CI deploys to [gh.helbling.uk](https://gh.helbling.uk) on website changes
-pushed to `main`. You can also run Website CI manually from `main`. The
-`production` GitHub environment needs `CLOUDFLARE_ACCOUNT_ID` and
-`CLOUDFLARE_API_TOKEN`, provisioned by the portfolio infrastructure project.
-
-The landing page links to GitHub Releases for downloads. Once a signed XPI is hosted
-on R2, add its public install URL to the page. For Firefox to fetch automatic updates
-from R2, set `browser_specific_settings.gecko.update_url` in the extension manifest
-to your public HTTPS update manifest URL before signing.
+For development and release instructions, see [CONTRIBUTING.md](CONTRIBUTING.md).
