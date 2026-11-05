@@ -10,14 +10,14 @@ VERSION="${VERSION#v}"
 npm run build
 
 rm -rf stage artifacts
-mkdir -p stage artifacts
+mkdir -p stage/icons artifacts
 cp -r dist popup.html content.css stage/
-# Stamp the release version into the packaged manifest only.
-jq --arg v "$VERSION" '.version = $v' manifest.json > stage/manifest.json
-
-# Same package for both browsers: Chrome ignores `browser_specific_settings`,
-# Firefox ignores nothing we use. Different names keep the release assets clear.
+cp icons/icon-128.png stage/icons/
+# Chrome does not use Gecko metadata. Keep the Firefox manifest in stage for signing.
+jq --arg v "$VERSION" '.version = $v | del(.browser_specific_settings)' manifest.json > stage/manifest.json
 (cd stage && zip -qr "../artifacts/gh-absolute-dates-chrome-v${VERSION}.zip" .)
+
+jq --arg v "$VERSION" '.version = $v' manifest.json > stage/manifest.json
 (cd stage && zip -qr "../artifacts/gh-absolute-dates-firefox-v${VERSION}.zip" .)
 
 echo "Packaged v${VERSION}:"
