@@ -1,0 +1,12 @@
+{
+  "name": "gh-absolute-dates",
+  "compatibility_date": "2026-11-05",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "gh.helbling.uk", "custom_domain": true }
+  ],
+  "assets": {
+    "directory": "./public"
+  }
+}

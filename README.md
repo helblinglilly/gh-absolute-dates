@@ -3,6 +3,11 @@
 Browser extension (Chrome + Firefox, Manifest V3) that replaces GitHub's relative
 timestamps ("1 minute ago") with absolute dates ("10 Oct 2026, 22:38").
 
+## Repository layout
+
+- [Extension](extension/) contains the Chrome and Firefox extension and its build scripts.
+- [Website](website/) contains the static landing page. Open `website/public/index.html` locally or serve `website/public/` with a static web host.
+
 ## Install
 
 Download the latest packages from the
@@ -59,7 +64,8 @@ and new elements. Settings are stored in `storage.sync` and applied live.
 ## Development
 
 ```
-npm install
+cd extension
+npm ci
 npm run build      # typecheck + bundle into dist/
 npm run watch      # rebuild on change
 ```
@@ -68,7 +74,7 @@ Source is in `src/` (`content.ts`, `popup.ts`, `format.ts`, `settings.ts`).
 
 Load it for testing:
 
-- **Chrome:** `chrome://extensions` → Developer mode → *Load unpacked* → select this folder.
+- **Chrome:** `chrome://extensions` → Developer mode → *Load unpacked* → select `extension/`.
 - **Firefox:** `about:debugging#/runtime/this-firefox` → *Load Temporary Add-on* → select
   `manifest.json`, or run `npx web-ext run`.
 
@@ -86,9 +92,22 @@ git push origin v1.2.0
 The workflow builds the extension, stamps the tag's version into the manifest, and attaches
 a Chrome zip and a Firefox package to a new GitHub release.
 
-To also attach a **signed Firefox `.xpi`**, add the repository secrets `AMO_JWT_ISSUER` and
+To also attach a **signed Firefox `.xpi`**, provision the `extension-release` environment secrets `AMO_JWT_ISSUER` and
 `AMO_JWT_SECRET` (API keys from <https://addons.mozilla.org/developers/addon/api/key/>).
 Without them the Firefox package is an unsigned zip. Publishing to the Chrome Web Store or
 the public Firefox add-on listing is not automated.
 
-`ci.yml` typechecks and builds on every push to `main` and on pull requests.
+Extension CI builds changes under `extension/`. Website CI runs for changes under
+`website/` and uploads the static files as a `website` artifact. Each workflow also
+runs when its own configuration changes. Website changes can ship independently of
+extension release tags.
+
+Website CI deploys to [gh.helbling.uk](https://gh.helbling.uk) on website changes
+pushed to `main`. You can also run Website CI manually from `main`. The
+`production` GitHub environment needs `CLOUDFLARE_ACCOUNT_ID` and
+`CLOUDFLARE_API_TOKEN`, provisioned by the portfolio infrastructure project.
+
+The landing page links to GitHub Releases for downloads. Once a signed XPI is hosted
+on R2, add its public install URL to the page. For Firefox to fetch automatic updates
+from R2, set `browser_specific_settings.gecko.update_url` in the extension manifest
+to your public HTTPS update manifest URL before signing.

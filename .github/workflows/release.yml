@@ -1,4 +1,4 @@
-name: Release
+name: Extension Release
 
 # Push a tag like v1.2.0 to publish a release with Chrome and Firefox packages.
 on:
@@ -8,11 +8,16 @@ on:
 permissions:
   contents: write
 
+defaults:
+  run:
+    working-directory: extension
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: extension-release
     env:
-      # Optional: set these repository secrets to get a signed Firefox .xpi.
+      # Optional: set these environment secrets to get a signed Firefox .xpi.
       # Create keys at https://addons.mozilla.org/developers/addon/api/key/
       AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
       AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
@@ -22,6 +27,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: extension/package-lock.json
       - run: npm ci
 
       - name: Package for Chrome and Firefox
