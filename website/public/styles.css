@@ -38,13 +38,15 @@ h2 { font-size: 1.25rem; margin: 0; }
 .intro, .details p, dt { color: #bac5d3; }
 
 .button {
-  display: inline-block;
+  display: flex;
   padding: .65rem 1.15rem;
   border-radius: .5rem;
   color: #0d1117;
   background: #a3ceff;
   font-weight: 700;
   text-decoration: none;
+  text-align: center;
+  align-items: center;
 }
 
 .button:hover { background: #c4e0ff; }
@@ -59,6 +61,45 @@ time { color: #a8edc5; }
 
 @media (max-width: 45rem) {
   .hero, .details { grid-template-columns: 1fr; }
+}
+
+.landing {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.landing main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.landing .hero {
+  width: 100%;
+  padding-block: clamp(1rem, 4svh, 3rem);
+  gap: clamp(1rem, 3svh, 3rem);
+}
+
+.landing .hero > * { min-width: 0; }
+.landing dd { overflow-wrap: anywhere; }
+
+@media (max-height: 50rem) {
+  .landing header, .landing footer { padding-block: .65rem; }
+  .landing .hero { padding-block: .75rem; gap: 1rem; }
+  .landing h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+  .landing .eyebrow { margin-block: 0 .5rem; }
+  .landing .intro { margin-block: .75rem; font-size: 1rem; }
+  .landing figure { padding: .75rem; }
+  .landing dl div { padding-block: .4rem; }
+}
+
+@media (max-width: 45rem) and (max-height: 50rem) {
+  .landing .shell { width: calc(100% - 2rem); }
+  .landing header { gap: .25rem 1rem; }
+  .landing h1 { font-size: clamp(1.75rem, 7vw, 2.6rem); }
+  .landing .button { padding: .5rem .75rem; }
+  .landing dd { font-size: 1rem; }
 }
 
 .policy { max-width: 65ch; padding-block: 3rem; }

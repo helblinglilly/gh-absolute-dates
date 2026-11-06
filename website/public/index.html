@@ -7,8 +7,25 @@
   <title>GitHub Absolute Dates</title>
   <link rel="icon" type="image/png" sizes="128x128" href="icon-128.png">
   <link rel="stylesheet" href="styles.css">
+
+  <script>
+    function getRelativeDate() {
+      const date = new Date();
+      date.setDate(date.getDate() - 3);
+      return date;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const date = getRelativeDate();
+      const time = document.getElementById("example-date");
+
+      time.dateTime = date.toISOString();
+      time.textContent = date.toLocaleString();
+    });
+  </script>
+
 </head>
-<body>
+<body class="landing">
   <header class="shell">
     <span class="brand"><img src="icon-128.png" width="28" height="28" alt="">GitHub Absolute Dates</span>
     <a href="https://github.com/helblinglilly/gh-absolute-dates">View source</a>
@@ -16,30 +33,34 @@
   <main class="shell">
     <section class="hero">
       <div>
-        <p class="eyebrow">Browser extension for Firefox and Chrome</p>
-        <h1>See exactly when it happened.</h1>
-        <p class="intro">Read the date and time on GitHub commits, issues, and pull requests at a glance.</p>
+        <h1>Sensible timestamps.</h1>
+        <p class="intro">Read accurate timestamps when it matters most, not a vague indicator.</p>
         <div class="actions">
-          <a class="button" href="/downloads/gh-absolute-dates-1.0.1.xpi">Install for Firefox</a>
-          <a class="button" href="https://chrome.google.com/webstore/detail/emgehigipehjohffhkjchncdplggnimo">Install for Chrome</a>
+          <a href="https://chrome.google.com/webstore/detail/emgehigipehjohffhkjchncdplggnimo">
+            <img
+              src="https://developer.chrome.com/static/docs/webstore/branding/image/UV4C4ybeBTsZt43U4xis.png"
+              width="206"
+              height="58"
+              style="display: block;"
+              alt="Install via Chrome web store"
+            />
+          </a>
+          <a class="button" href="/downloads/gh-absolute-dates-1.0.2.xpi">Install for Firefox</a>
         </div>
       </div>
-      <figure>
-        <figcaption>Example timestamp</figcaption>
-        <dl>
-          <div><dt>GitHub default</dt><dd>3 days ago</dd></div>
-          <div><dt>With the extension</dt><dd><time datetime="2026-10-10T22:38">10 Oct 2026, 22:38</time></dd></div>
-        </dl>
-      </figure>
-    </section>
-    <section class="details" aria-labelledby="setup">
-      <div>
-        <h2 id="setup">Get started</h2>
-        <p>In Firefox, click Install for Firefox and confirm the browser prompt. In Chrome, click Install for Chrome and add it from the <a href="https://chrome.google.com/webstore/detail/emgehigipehjohffhkjchncdplggnimo">Chrome Web Store</a>.</p>
-      </div>
-      <div>
-        <h2>Choose your date format</h2>
-        <p>Use the toolbar popup to set your preferred format, hide today’s date, or omit the year for timestamps in the current calendar year.</p>
+      <div style="display: grid; gap: 1rem;">
+        <figure>
+          <figcaption>❌ chore: build date modification into Web UI</figcaption>
+          <dl>
+            <div><dt>GitHub's default behaviour</dt><dd>3 days ago</dd></div>
+          </dl>
+        </figure>
+        <figure>
+          <figcaption>✅ feat: customise date via browser extension</figcaption>
+          <dl>
+            <div><dt>With this extension</dt><dd><time id="example-date"></time></dd></div>
+          </dl>
+        </figure>
       </div>
     </section>
   </main>
