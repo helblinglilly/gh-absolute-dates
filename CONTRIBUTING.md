@@ -37,29 +37,32 @@ Build the same packages the release produces with `npm run package` (output in `
 and builds when a pull request or a push to `main` changes `extension/` or the
 workflow itself.
 
-To publish a GitHub Release, tag the commit you want to release with a new version
-and push the tag:
+To publish a new version, bump `version` in `extension/manifest.json` (for example
+`1.0.1` → `1.1.0`) and get it onto `main`. The
+[release workflow](.github/workflows/release.yml) runs on every push to `main` that
+touches `extension/`. If no `v<version>` tag exists yet, it:
 
-```sh
-git tag v1.0.2
-git push origin v1.0.2
-```
+1. builds the Chrome and Firefox packages;
+2. uploads and publishes the Chrome ZIP to the Chrome Web Store (it then goes through
+   Google's review);
+3. submits the Firefox package to the **listed** channel on addons.mozilla.org, with
+   `extension/amo-metadata.json` and a source archive for review. Mozilla hosts it and
+   updates users automatically once approved;
+4. creates the `v<version>` tag and a GitHub Release with auto-generated notes and the
+   packages attached.
 
-The [release workflow](.github/workflows/release.yml) uses the tag as the packaged
-manifest version and attaches Chrome and Firefox ZIPs to the GitHub Release.
-If both `AMO_JWT_ISSUER` and `AMO_JWT_SECRET` are set in the GitHub
-`extension-release` environment, the workflow also requests Mozilla signing and
-attaches the signed XPI. Otherwise, the Firefox ZIP is the only Firefox asset.
+Pushes that don't change the version stop after the check. If one store fails, use
+**Re-run failed jobs**. Re-running everything would upload again to the store that
+already accepted the version, and that store would reject the duplicate. You can also
+start the workflow by hand from the Actions tab.
 
-- **Chrome:** Upload the Chrome ZIP to the existing Chrome Web Store listing and
-  submit the update for review.
-- **Firefox:** Copy the signed XPI into `website/public/downloads/` and update the
-  **Install for Firefox** link in `website/public/index.html`. Push those website
-  changes to `main` to deploy the download. The currently served Firefox 1.0.1
-  has no `update_url`, so users on that build need to install the newer XPI manually.
-  To enable automatic updates from the website for a future build, set
-  `browser_specific_settings.gecko.update_url` to the public HTTPS URL of a Firefox
-  update manifest before signing.
+Required secrets in the GitHub `extension-release` environment:
+
+- `AMO_JWT_ISSUER`, `AMO_JWT_SECRET`:
+  [AMO API keys](https://addons.mozilla.org/developers/addon/api/key/).
+- `CHROME_CLIENT_ID`, `CHROME_CLIENT_SECRET`, `CHROME_REFRESH_TOKEN`,
+  `CHROME_PUBLISHER_ID`: Chrome Web Store API credentials, see
+  [this guide](https://github.com/fregante/chrome-webstore-upload-keys).
 
 ## Website CI and deployment
 

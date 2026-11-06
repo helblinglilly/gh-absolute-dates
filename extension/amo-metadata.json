@@ -1,0 +1,10 @@
+{
+  "summary": {
+    "en-US": "Shows absolute timestamps on GitHub (e.g. \"6 Nov 2026, 14:05\") instead of relative ones (\"1 minute ago\"), with a configurable format."
+  },
+  "categories": ["web-development"],
+  "homepage": { "en-US": "https://gh.helbling.uk" },
+  "version": {
+    "license": "MIT"
+  }
+}

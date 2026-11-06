@@ -1,26 +1,55 @@
 name: Extension Release
 
-# Push a tag like v1.2.0 to publish a release with Chrome and Firefox packages.
+# Publishes to the Chrome Web Store, addons.mozilla.org (listed) and GitHub
+# Releases whenever extension/manifest.json on main carries a version that has
+# no matching v* tag yet. Bump the manifest version to ship; any other change
+# to extension/ only runs the check and stops.
 on:
   push:
-    tags: ["v*.*.*"]
+    branches: [main]
+    paths:
+      - 'extension/**'
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+# Never let two releases race each other.
+concurrency:
+  group: extension-release
+  cancel-in-progress: false
 
 defaults:
   run:
     working-directory: extension
 
 jobs:
-  release:
+  check:
     runs-on: ubuntu-latest
-    environment: extension-release
-    env:
-      # Optional: set these environment secrets to get a signed Firefox .xpi.
-      # Create keys at https://addons.mozilla.org/developers/addon/api/key/
-      AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
-      AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.version.outputs.release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # tags are needed to tell whether this version shipped
+      - id: version
+        run: |
+          VERSION=$(jq -r .version manifest.json)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo "v$VERSION is already released; bump extension/manifest.json to publish."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Releasing v$VERSION."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: check
+    if: needs.check.outputs.release == 'true'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,24 +58,92 @@ jobs:
           cache: npm
           cache-dependency-path: extension/package-lock.json
       - run: npm ci
+      - run: scripts/package.sh "${{ needs.check.outputs.version }}"
+      # AMO requires the human-readable source when the submission is bundled.
+      - name: Archive source for AMO review
+        working-directory: .
+        run: git archive --format=zip -o extension/source.zip HEAD extension LICENSE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          # stage/ holds the Firefox manifest; web-ext signs a directory, not a zip.
+          path: |
+            extension/artifacts/
+            extension/stage/
+            extension/source.zip
+          if-no-files-found: error
 
-      - name: Package for Chrome and Firefox
-        run: scripts/package.sh "${GITHUB_REF_NAME}"
+  chrome:
+    needs: [check, build]
+    runs-on: ubuntu-latest
+    environment: extension-release
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: packages
+          path: extension
+      - name: Upload and publish to the Chrome Web Store
+        env:
+          EXTENSION_ID: emgehigipehjohffhkjchncdplggnimo
+          CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
+        run: |
+          npx --yes chrome-webstore-upload-cli@4 \
+            --source "artifacts/gh-absolute-dates-chrome-v${{ needs.check.outputs.version }}.zip"
 
-      - name: Sign for Firefox (self-distributed .xpi)
-        if: env.AMO_JWT_ISSUER != '' && env.AMO_JWT_SECRET != ''
+  firefox:
+    needs: [check, build]
+    runs-on: ubuntu-latest
+    environment: extension-release
+    steps:
+      - uses: actions/checkout@v4 # for amo-metadata.json and the pinned web-ext
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: packages
+          path: extension
+      - name: Submit to addons.mozilla.org (listed)
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        # Listed versions go through AMO review, so submit without waiting
+        # for approval; Mozilla hosts the file and updates users itself.
         run: |
           npx web-ext sign \
             --source-dir stage \
-            --artifacts-dir artifacts \
-            --channel unlisted \
+            --artifacts-dir amo \
+            --channel listed \
+            --amo-metadata amo-metadata.json \
+            --upload-source-code source.zip \
+            --approval-timeout 0 \
             --api-key "$AMO_JWT_ISSUER" \
             --api-secret "$AMO_JWT_SECRET"
 
-      - name: Create GitHub release
+  github-release:
+    # Runs last: the tag it creates is what marks this version as shipped.
+    needs: [check, build, chrome, firefox]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: packages
+          path: extension
+      - name: Create tag and GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: v${{ needs.check.outputs.version }}
         run: |
-          gh release create "$GITHUB_REF_NAME" artifacts/* \
-            --title "$GITHUB_REF_NAME" \
+          gh release create "$TAG" artifacts/* \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
             --generate-notes
