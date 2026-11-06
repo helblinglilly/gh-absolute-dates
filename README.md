@@ -9,6 +9,12 @@ timestamps ("1 minute ago") with absolute dates ("10 Oct 2026, 22:38").
 
 ### Chrome (and Chromium browsers: Edge, Brave, ...)
 
+Install from the
+[Chrome Web Store](https://chrome.google.com/webstore/detail/emgehigipehjohffhkjchncdplggnimo).
+It updates automatically.
+
+To install manually from a release instead:
+
 1. Download the Chrome ZIP from [GitHub Releases](https://github.com/helblinglilly/gh-absolute-dates/releases/latest)
    and **unzip it** into a folder you can keep. Chrome loads the extension from that folder.
 2. Open `chrome://extensions` and turn on **Developer mode** (top right).
@@ -38,7 +44,10 @@ Click the extension's toolbar icon:
 - **Hide the year for this year's timestamps**: year tokens are removed for the current
   year, so the default becomes `d MMM, HH:mm`. If both apply (a timestamp from today),
   hiding the date wins.
+- **Show all dates in UTC**: timestamps are shown in UTC instead of your browser's
+  time zone. "Today" and "this year" are then also judged in UTC. Add a literal to the
+  format to make this visible, e.g. `d MMM yyyy, HH:mm 'UTC'`.
 
-Both checkboxes are off by default. Changes apply live, without reloading GitHub.
+All checkboxes are off by default. Changes apply live, without reloading GitHub.
 
 For development and release instructions, see [CONTRIBUTING.md](CONTRIBUTING.md).

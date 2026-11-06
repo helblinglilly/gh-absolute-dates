@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GitHub Absolute Dates",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Shows absolute timestamps on GitHub instead of relative ones (e.g. \"Nov 3, 2026\" instead of \"1 minute ago\").",
   "icons": {
     "128": "icons/icon-128.png"

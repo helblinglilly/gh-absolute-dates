@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { UTCDate } from "@date-fns/utc";
 import type { Settings } from "./settings";
 
 // Matches a quoted literal ('at'), an escaped quote (''), or a run of one
@@ -68,6 +69,9 @@ function isSameDay(a: Date, b: Date): boolean {
 
 /** Throws a RangeError if the pattern isn't valid date-fns syntax. */
 export function formatTimestamp(date: Date, s: Settings, now = new Date()): string {
+  // TODO(human): when s.useUtc is set, reassign `date` and `now` so the
+  // today/this-year checks and format() below all operate in UTC.
+
   let pattern = s.format;
   if (s.hideDateToday && isSameDay(date, now)) {
     pattern = stripDateTokens(pattern);

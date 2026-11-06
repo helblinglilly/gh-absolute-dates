@@ -3,6 +3,8 @@ export interface Settings {
   hideDateToday: boolean;
   /** When the timestamp is from the current year, drop the year. */
   hideYearThisYear: boolean;
+  /** Show timestamps in UTC instead of the browser's local time zone. */
+  useUtc: boolean;
   /** One pattern for the whole timestamp, e.g. "d MMM yyyy, HH:mm". */
   format: string;
 }
@@ -10,6 +12,7 @@ export interface Settings {
 export const DEFAULTS: Settings = {
   hideDateToday: false,
   hideYearThisYear: false,
+  useUtc: false,
   format: "d MMM yyyy, HH:mm",
 };
 

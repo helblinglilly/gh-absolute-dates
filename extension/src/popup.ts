@@ -5,6 +5,7 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 
 const hideDateToday = $<HTMLInputElement>("hideDateToday");
 const hideYearThisYear = $<HTMLInputElement>("hideYearThisYear");
+const useUtc = $<HTMLInputElement>("useUtc");
 const format = $<HTMLInputElement>("format");
 const preview = $("preview");
 
@@ -12,6 +13,7 @@ function current(): Settings {
   return {
     hideDateToday: hideDateToday.checked,
     hideYearThisYear: hideYearThisYear.checked,
+    useUtc: useUtc.checked,
     format: format.value,
   };
 }
@@ -19,6 +21,7 @@ function current(): Settings {
 function render(s: Settings): void {
   hideDateToday.checked = s.hideDateToday;
   hideYearThisYear.checked = s.hideYearThisYear;
+  useUtc.checked = s.useUtc;
   format.value = s.format;
   updatePreview();
 }
@@ -41,7 +44,7 @@ function save(): void {
   void chrome.storage.sync.set(current());
 }
 
-for (const el of [hideDateToday, hideYearThisYear, format]) {
+for (const el of [hideDateToday, hideYearThisYear, useUtc, format]) {
   el.addEventListener("input", save);
 }
 $("reset").addEventListener("click", () => {
